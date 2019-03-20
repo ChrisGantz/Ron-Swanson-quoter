@@ -2,44 +2,47 @@ import React, { Component } from 'react';
 import Giftro from './components/giftro';
 import './App.css'
 import QuoteSize from './components/quote-size-button';
-import { getQuoteFromApi } from "./actions/get-quotes";
+import { getQuoteFromApi } from "./actions/get-quote";
+import Quote from './components/quote';
 class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
       quotes: [],
-      quoteLengthFilter: 'small',
-      quoteAmnt: 1
+      quoteLengthFilter: 'any',
     }
   }
 
   async componentDidMount() {
-    let filteredQuotes = await getQuoteFromApi(this.state.quoteAmnt, this.state.quoteLengthFilter);
-    let count = 0;
-    while(!filteredQuotes.length && count < 50) {
-      // Could also create try catch but for development purposes I will set max calls to 50
-      count++;
-      console.log('count:', count)
-      filteredQuotes = await getQuoteFromApi(this.state.quoteAmnt, this.state.quoteLengthFilter);
+    // There are 58 quotes in this Api
+    const quoteAmnt = 58;
+    let filteredQuotes = await getQuoteFromApi(quoteAmnt, this.state.quoteLengthFilter);
+    if(!filteredQuotes.length) {
+      this.setState({
+        quotes: ['Could not find a quote please try again']
+      })
+    } else {
+      this.setState({
+        quotes: filteredQuotes
+      })
     }
-    console.log('filteredQuotes:', filteredQuotes)
-    this.setState({
-      quotes: filteredQuotes
-    })
   }
 
-  onClickAdjustLength(lnth) {
+  onClickAdjustLength = (e) => {
     this.setState({
-      quoteLengthFilter: `${lnth}`
+      quoteLengthFilter: e.target.value
     })
   }
 
   render() {
-    console.log(this.state.quotes);
+    const quotes = this.state.quotes;
+    const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+    // console.log('randomQuote:', randomQuote)
     return (
       <main className="App" role="main">
         <Giftro />
-        <QuoteSize />
+        <QuoteSize onClickChangeQuote={this.onClickAdjustLength}/>
+        <Quote quote={randomQuote}/>
       </main>
     );
   }
