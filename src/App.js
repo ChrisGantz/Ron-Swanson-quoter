@@ -2,53 +2,30 @@ import React, { Component } from 'react';
 import Giftro from './components/giftro';
 import './App.css'
 import QuoteSize from './components/quote-size-button';
-
-const BASE_URL = 'https://ron-swanson-quotes.herokuapp.com/v2/quotes/'
-const getQuoteFromApi = async (amount, filter) => {
-  try {
-    const res = await fetch(BASE_URL+amount);
-    const jsonedQuoteData = await res.json();
-    let filteredQuoteData = jsonedQuoteData.filter(quote => {
-      let quoteArr = quote.split(' ');
-      if (filter === 'small') {
-        return quoteArr.length <= 4;
-      } else if (filter === 'medium') {
-        return quoteArr.length >= 5 && quoteArr.length <= 12;
-      } else if (filter === 'large') {
-        return quoteArr.length >= 13;
-      } else {
-        return 0;
-      }
-    })
-    let count = 0
-    if(!filteredQuoteData.length) {
-      count++;
-      console.log('times run', count);
-      if(count === 10) {
-        throw new Error('Timed out')
-      }
-      else { getQuoteFromApi(amount, filter) };
-    }
-    console.log('filteredQuoteData:', filteredQuoteData)
-    return filteredQuoteData;
-  } catch (error) {
-    console.log('Friends: one to three is sufficient.')
-    console.log('error:', error)
-  }
-}
+import { getQuoteFromApi } from "./actions/get-quotes";
 class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      quote: [],
-      quoteLengthFilter: 'medium',
+      quotes: [],
+      quoteLengthFilter: 'small',
       quoteAmnt: 1
     }
   }
 
-  componentDidMount() {
-    // getQuoteFromApi(this.state.quoteAmnt, this.state.quoteLengthFilter);
-    console.log('getQuoteFromApi:', getQuoteFromApi(this.state.quoteAmnt, this.state.quoteLengthFilter))
+  async componentDidMount() {
+    let filteredQuotes = await getQuoteFromApi(this.state.quoteAmnt, this.state.quoteLengthFilter);
+    let count = 0;
+    while(!filteredQuotes.length && count < 50) {
+      // Could also create try catch but for development purposes I will set max calls to 50
+      count++;
+      console.log('count:', count)
+      filteredQuotes = await getQuoteFromApi(this.state.quoteAmnt, this.state.quoteLengthFilter);
+    }
+    console.log('filteredQuotes:', filteredQuotes)
+    this.setState({
+      quotes: filteredQuotes
+    })
   }
 
   onClickAdjustLength(lnth) {
@@ -58,6 +35,7 @@ class App extends Component {
   }
 
   render() {
+    console.log(this.state.quotes);
     return (
       <main className="App" role="main">
         <Giftro />
