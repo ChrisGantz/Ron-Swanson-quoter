@@ -2,44 +2,71 @@ import React, { Component } from 'react';
 import Giftro from './components/giftro';
 import './App.css'
 import QuoteSize from './components/quote-size-button';
-import { getQuoteFromApi } from "./actions/get-quotes";
+import { getQuoteFromApi } from "./actions/get-quote";
+import Quote from './components/quote';
 class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
       quotes: [],
-      quoteLengthFilter: 'small',
-      quoteAmnt: 1
+      filteredQuotes: [],
     }
   }
 
   async componentDidMount() {
-    let filteredQuotes = await getQuoteFromApi(this.state.quoteAmnt, this.state.quoteLengthFilter);
-    let count = 0;
-    while(!filteredQuotes.length && count < 50) {
-      // Could also create try catch but for development purposes I will set max calls to 50
-      count++;
-      console.log('count:', count)
-      filteredQuotes = await getQuoteFromApi(this.state.quoteAmnt, this.state.quoteLengthFilter);
+    // There are 58 quotes in this Api
+    const quoteAmnt = 58;
+    let allQuotes = await getQuoteFromApi(quoteAmnt, this.state.quoteLengthFilter);
+    if (!allQuotes.length) {
+      this.setState({
+        quotes: ['Could not find a quote please try again']
+      })
+    } else {
+      this.setState({
+        quotes: allQuotes,
+        filteredQuotes: allQuotes
+      })
     }
-    console.log('filteredQuotes:', filteredQuotes)
-    this.setState({
-      quotes: filteredQuotes
-    })
   }
 
-  onClickAdjustLength(lnth) {
-    this.setState({
-      quoteLengthFilter: `${lnth}`
+  onClickChangeFilter = (e) => {
+    console.log('e:', e.target.value)
+    const filter  = e.target.value
+    // let quoteFilter = this.state.quoteLengthFilter;
+    let filteredQuoteData = this.state.quotes.filter(quote => {
+      let quoteArr = quote.split(' ');
+      if (filter === 'small') {
+        return quoteArr.length <= 4;
+      } else if (filter === 'medium') {
+        return quoteArr.length >= 5 && quoteArr.length <= 12;
+      } else if (filter === 'large') {
+        return quoteArr.length >= 13;
+      } else if (filter === 'any') {
+        return 1;
+      } else {
+        return 0;
+      }
     })
+    if(!filteredQuoteData.length) {
+      this.setState({
+        filteredQuotes: ['<iframe src="https://giphy.com/embed/vc0KiL9PrHzLMZpjyh" width="480" height="336" frameBorder="0" className="giphy-embed" allowFullScreen></iframe><p><a href="https://giphy.com/gifs/reaction-vc0KiL9PrHzLMZpjyh">via giphy</a></p>']
+      })
+    } else {
+      this.setState({
+        filteredQuotes: filteredQuoteData,
+      })
+    }
   }
-
+  
   render() {
-    console.log(this.state.quotes);
+    const quotes = this.state.filteredQuotes;
+    const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+    // console.log('randomQuote:', randomQuote)
     return (
       <main className="App" role="main">
         <Giftro />
-        <QuoteSize />
+        <QuoteSize onClickChangeQuote={this.onClickChangeFilter}/>
+        <Quote quote={randomQuote}/>
       </main>
     );
   }
