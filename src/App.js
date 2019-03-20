@@ -9,39 +9,63 @@ class App extends Component {
     super(props);
     this.state = {
       quotes: [],
-      quoteLengthFilter: 'any',
+      filteredQuotes: [],
     }
   }
 
   async componentDidMount() {
     // There are 58 quotes in this Api
     const quoteAmnt = 58;
-    let filteredQuotes = await getQuoteFromApi(quoteAmnt, this.state.quoteLengthFilter);
-    if(!filteredQuotes.length) {
+    let allQuotes = await getQuoteFromApi(quoteAmnt, this.state.quoteLengthFilter);
+    if (!allQuotes.length) {
       this.setState({
         quotes: ['Could not find a quote please try again']
       })
     } else {
       this.setState({
-        quotes: filteredQuotes
+        quotes: allQuotes,
+        filteredQuotes: allQuotes
       })
     }
   }
 
-  onClickAdjustLength = (e) => {
-    this.setState({
-      quoteLengthFilter: e.target.value
+  onClickChangeFilter = (e) => {
+    console.log('e:', e.target.value)
+    const filter  = e.target.value
+    // let quoteFilter = this.state.quoteLengthFilter;
+    let filteredQuoteData = this.state.quotes.filter(quote => {
+      let quoteArr = quote.split(' ');
+      if (filter === 'small') {
+        return quoteArr.length <= 4;
+      } else if (filter === 'medium') {
+        return quoteArr.length >= 5 && quoteArr.length <= 12;
+      } else if (filter === 'large') {
+        return quoteArr.length >= 13;
+      } else if (filter === 'any') {
+        return 1;
+      } else {
+        return 0;
+      }
     })
+    if(!filteredQuoteData.length) {
+      this.setState({
+        filteredQuotes: ['<iframe src="https://giphy.com/embed/vc0KiL9PrHzLMZpjyh" width="480" height="336" frameBorder="0" className="giphy-embed" allowFullScreen></iframe><p><a href="https://giphy.com/gifs/reaction-vc0KiL9PrHzLMZpjyh">via giphy</a></p>']
+      })
+    } else {
+      this.setState({
+        filteredQuotes: filteredQuoteData,
+      })
+    }
   }
-
+  
   render() {
-    const quotes = this.state.quotes;
+    const quotes = this.state.filteredQuotes;
     const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
     // console.log('randomQuote:', randomQuote)
     return (
       <main className="App" role="main">
         <Giftro />
-        <QuoteSize onClickChangeQuote={this.onClickAdjustLength}/>
+        <QuoteSize onClickChangeQuote={this.onClickChangeFilter}/>
         <Quote quote={randomQuote}/>
       </main>
     );
