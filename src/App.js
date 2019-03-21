@@ -10,6 +10,7 @@ class App extends Component {
     this.state = {
       quotes: [],
       filteredQuotes: [],
+      ratingValue: 5
     }
   }
 
@@ -59,16 +60,26 @@ class App extends Component {
       })
     }
   }
+
+  handleRadioChange = (e) => {
+    let rating = e.target.value;
+    this.setState({
+      ratingValue: rating
+    })
+  }
+
+  handleSubmitRating = () => {
+    
+  }
   
   render() {
     const quotes = this.state.filteredQuotes;
     const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
-    // console.log('randomQuote:', randomQuote)
     return (
       <main className="App" role="main">
         <Giftro />
         <QuoteSize onClickChangeQuote={this.onClickChangeFilter}/>
-        <Quote quote={randomQuote}/>
+        <Quote quote={randomQuote} handleRadioButtonChange={this.handleRadioChange}/>
       </main>
     );
   }

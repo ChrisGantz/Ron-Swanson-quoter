@@ -9,3 +9,17 @@ export const getRatedData = async () => {
     console.log(error);
   }
 }
+
+export const postQuoteRating = async () => {
+  try {
+    const res = await fetch(`${API_BASE_URL}/quotes`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({})
+    })
+  } catch (error) {
+    console.log('error:', error)
+  }
+}
