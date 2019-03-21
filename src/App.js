@@ -3,6 +3,7 @@ import Giftro from './components/giftro';
 import './App.css'
 import QuoteSize from './components/quote-size-button';
 import { getQuoteFromApi } from "./actions/get-quote";
+import { postQuoteRating } from "./actions/rate-quote";
 import Quote from './components/quote';
 class App extends Component {
   constructor(props) {
@@ -10,16 +11,15 @@ class App extends Component {
     this.state = {
       quotes: [],
       filteredQuotes: [],
-      ratingValue: 5
+      ratingValue: 5,
+      randomQuote: ''
     }
   }
 
   async componentDidMount() {
-    // There are 58 quotes in this Api
     document.cookie = 'secret_code'
-    // console.log('document.cookie:', document.cookie)
     localStorage.setItem('secret', 'code')
-    // console.log('localStorage:', localStorage.getItem('secret'))
+    // There are 58 quotes in this Api
     const quoteAmnt = 58;
     let allQuotes = await getQuoteFromApi(quoteAmnt);
     if (!allQuotes.length) {
@@ -50,36 +50,53 @@ class App extends Component {
         return 0;
       }
     })
+    const randQuote = filteredQuoteData[Math.floor(Math.random() * filteredQuoteData.length)];
     if(!filteredQuoteData.length) {
       this.setState({
-        filteredQuotes: ['<iframe src="https://giphy.com/embed/vc0KiL9PrHzLMZpjyh" width="480" height="336" frameBorder="0" className="giphy-embed" allowFullScreen></iframe><p><a href="https://giphy.com/gifs/reaction-vc0KiL9PrHzLMZpjyh">via giphy</a></p>']
+        filteredQuotes: ['<iframe src="https://giphy.com/embed/vc0KiL9PrHzLMZpjyh" width="480" height="336" frameBorder="0" className="giphy-embed" allowFullScreen></iframe><p><a href="https://giphy.com/gifs/reaction-vc0KiL9PrHzLMZpjyh">via giphy</a></p>'],
+        randomQuote: randQuote
       })
     } else {
       this.setState({
         filteredQuotes: filteredQuoteData,
+        randomQuote: randQuote
       })
     }
   }
 
-  handleRadioChange = (e) => {
+  handleRadioButtonChange = (e) => {
     let rating = e.target.value;
     this.setState({
       ratingValue: rating
     })
   }
 
-  handleSubmitRating = () => {
-    
+  handleSubmitRating = (quote, rating) => {
+    const localSession = localStorage.get('secret');
+    console.log('localSession:', localSession)
+    const cookieSession = document.cookie;
+    console.log('cookieSession:', cookieSession)
+    if(rating < 5) {
+      alert('Your opinion didnt matter it was saved as 5 anyways');
+    }
+    if(cookieSession !== 'secret_code' || localSession !== 'code') {
+      alert('Have you tried refreshing?')
+    } else {
+      postQuoteRating(quote, rating, localSession, cookieSession)
+    }
   }
   
   render() {
-    const quotes = this.state.filteredQuotes;
-    const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+    const initialQuote = this.state.quotes[11]
     return (
       <main className="App" role="main">
         <Giftro />
         <QuoteSize onClickChangeQuote={this.onClickChangeFilter}/>
-        <Quote quote={randomQuote} handleRadioButtonChange={this.handleRadioChange}/>
+        <Quote 
+          quote={ !this.state.randomQuote.length ? initialQuote : this.state.randomQuote}
+          handleRadioButtonChange={this.handleRadioButtonChange}
+          handleSubmitRating={ this.handleSubmitRating }          
+          />
       </main>
     );
   }
