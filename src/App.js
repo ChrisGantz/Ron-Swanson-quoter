@@ -15,8 +15,12 @@ class App extends Component {
 
   async componentDidMount() {
     // There are 58 quotes in this Api
+    document.cookie = 'secret_code'
+    // console.log('document.cookie:', document.cookie)
+    localStorage.setItem('secret', 'code')
+    // console.log('localStorage:', localStorage.getItem('secret'))
     const quoteAmnt = 58;
-    let allQuotes = await getQuoteFromApi(quoteAmnt, this.state.quoteLengthFilter);
+    let allQuotes = await getQuoteFromApi(quoteAmnt);
     if (!allQuotes.length) {
       this.setState({
         quotes: ['Could not find a quote please try again']
@@ -30,9 +34,7 @@ class App extends Component {
   }
 
   onClickChangeFilter = (e) => {
-    console.log('e:', e.target.value)
     const filter  = e.target.value
-    // let quoteFilter = this.state.quoteLengthFilter;
     let filteredQuoteData = this.state.quotes.filter(quote => {
       let quoteArr = quote.split(' ');
       if (filter === 'small') {

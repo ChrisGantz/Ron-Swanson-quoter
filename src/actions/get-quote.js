@@ -1,5 +1,5 @@
 const BASE_URL = 'https://ron-swanson-quotes.herokuapp.com/v2/quotes/'
-export const getQuoteFromApi = async (amount, filter) => {
+export const getQuoteFromApi = async (amount) => {
   try {
     console.log("how many times do we call to api?")
     const res = await fetch(BASE_URL + amount);
