@@ -1,6 +1,21 @@
+ul {
+  list-style: none;
+}
+
 .star1, .rating-2 .star2, .rating-3 .star2, .rating-4 .star2, .rating-5 .star2,
 .rating-3 .star3, .rating-4 .star3, .rating-5 .star3, 
 .rating-4 .star4, .rating-5 .star4,
 .rating-5 .star5 {
   color: gold;
+}
+.rated-quotes-wrap {
+  display: flex;
+  justify-content: center;
+}
+.quote-wrap {
+  margin: 20px;
+  height: 150px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
