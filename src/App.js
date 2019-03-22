@@ -5,6 +5,7 @@ import QuoteSize from './components/quote-size-button';
 import { getQuotesFromApi } from "./actions/get-quote";
 import { getRatedData, postQuoteRating } from "./actions/rate-quote";
 import Quote from './components/quote';
+import RatedQuotes from './components/rated-quotes';
 class App extends Component {
   constructor(props) {
     super(props);
@@ -42,7 +43,6 @@ class App extends Component {
 
 async getQuoteAndRatingFromMyDB() {
     let ratedQuotesData = await getRatedData();
-    console.log('ratedQuotesData:', ratedQuotesData)
     this.setState({
       ratedQuotes: ratedQuotesData
     })
@@ -92,16 +92,15 @@ async getQuoteAndRatingFromMyDB() {
     const rating = this.state.ratingValue;
     const quote = this.state.randomQuote;
     const isDuplicate = this.checkIfVoted(quote, localSession, cookieSession);
-    console.log('isDuplicate:', isDuplicate)
-    if(rating < 5) {
-      alert('Doesn\'t matter it was saved as 5 anyways');
-    }
     if(cookieSession !== 'secret_code' && localSession !== 'code') {
       alert('Have you tried refreshing?')
     } else if(isDuplicate === true) {
       alert('You already voted beat it!')
     } else {
       let resData = await postQuoteRating(quote, rating, localSession, cookieSession);
+        if (rating < 5) {
+          alert('Doesn\'t matter it was saved as 5 anyways');
+        }
       this.setState(prevState => ({
         ratedQuotes: [resData, ...prevState.ratedQuotes]
       }))
@@ -114,7 +113,6 @@ async getQuoteAndRatingFromMyDB() {
   }
   
   render() {
-    // console.log(this.state.ratedQuotes)
     const initialQuote = this.state.quotes[11]
     return (
       <main className="App" role="main">
@@ -125,6 +123,7 @@ async getQuoteAndRatingFromMyDB() {
           handleRadioButtonChange={this.handleRadioButtonChange}
           handleSubmit={ this.handleSubmit }          
           />
+        <RatedQuotes ratedQuotes={this.state.ratedQuotes}/>
       </main>
     );
   }
