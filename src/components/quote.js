@@ -5,7 +5,7 @@ const Quote = (props) => {
   return (
     <div className="quote-wrap">
       <h1>{props.quote}</h1>
-      <form>
+      <form onSubmit={(e) => props.handleSubmit(e)}>
         <legend>I'll give you bacon if you rate only 5's</legend>
         <div onChange={(e) => props.handleRadioButtonChange(e)}>
           <input type="radio" id="rating-1" name="rating" value="1" />
@@ -22,6 +22,9 @@ const Quote = (props) => {
 
           <input type="radio" id="rating-5" name="rating" value="5" defaultChecked="checked" />
           <label htmlFor="rating-5">5</label>
+        </div>
+        <div>
+          <button type="submit">submit</button>
         </div>
       </form>
     </div>

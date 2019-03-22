@@ -2,8 +2,8 @@ import React, { Component } from 'react';
 import Giftro from './components/giftro';
 import './App.css'
 import QuoteSize from './components/quote-size-button';
-import { getQuoteFromApi } from "./actions/get-quote";
-import { postQuoteRating } from "./actions/rate-quote";
+import { getQuotesFromApi } from "./actions/get-quote";
+import { getRatedData, postQuoteRating } from "./actions/rate-quote";
 import Quote from './components/quote';
 class App extends Component {
   constructor(props) {
@@ -12,16 +12,22 @@ class App extends Component {
       quotes: [],
       filteredQuotes: [],
       ratingValue: 5,
-      randomQuote: ''
+      randomQuote: '',
+      ratedQuotes: []
     }
   }
 
-  async componentDidMount() {
+  componentDidMount() {
+    this.getQuotesFromSwansonAPI();
+    this.getQuoteAndRatingFromMyDB();
+  }
+
+  async getQuotesFromSwansonAPI() {
     document.cookie = 'secret_code'
     localStorage.setItem('secret', 'code')
     // There are 58 quotes in this Api
     const quoteAmnt = 58;
-    let allQuotes = await getQuoteFromApi(quoteAmnt);
+    let allQuotes = await getQuotesFromApi(quoteAmnt);
     if (!allQuotes.length) {
       this.setState({
         quotes: ['Could not find a quote please try again']
@@ -32,6 +38,14 @@ class App extends Component {
         filteredQuotes: allQuotes
       })
     }
+  }
+
+async getQuoteAndRatingFromMyDB() {
+    let ratedQuotesData = await getRatedData();
+    console.log('ratedQuotesData:', ratedQuotesData)
+    this.setState({
+      ratedQuotes: ratedQuotesData
+    })
   }
 
   onClickChangeFilter = (e) => {
@@ -71,22 +85,36 @@ class App extends Component {
     })
   }
 
-  handleSubmitRating = (quote, rating) => {
-    const localSession = localStorage.get('secret');
-    console.log('localSession:', localSession)
+  handleSubmit = async (e) => {
+    e.preventDefault();
+    const localSession = localStorage.getItem('secret');
     const cookieSession = document.cookie;
-    console.log('cookieSession:', cookieSession)
+    const rating = this.state.ratingValue;
+    const quote = this.state.randomQuote;
+    const isDuplicate = this.checkIfVoted(quote, localSession, cookieSession);
+    console.log('isDuplicate:', isDuplicate)
     if(rating < 5) {
-      alert('Your opinion didnt matter it was saved as 5 anyways');
+      alert('Doesn\'t matter it was saved as 5 anyways');
     }
-    if(cookieSession !== 'secret_code' || localSession !== 'code') {
+    if(cookieSession !== 'secret_code' && localSession !== 'code') {
       alert('Have you tried refreshing?')
+    } else if(isDuplicate === true) {
+      alert('You already voted beat it!')
     } else {
-      postQuoteRating(quote, rating, localSession, cookieSession)
+      let resData = await postQuoteRating(quote, rating, localSession, cookieSession);
+      this.setState(prevState => ({
+        ratedQuotes: [resData, ...prevState.ratedQuotes]
+      }))
     }
+  }
+
+  checkIfVoted(quote, localSession, cookieSession) {
+    let val = this.state.ratedQuotes.find(obj => obj.quote === quote && (localSession === obj.localSession || cookieSession === obj.cookieSession));
+    return val ? true : false;
   }
   
   render() {
+    // console.log(this.state.ratedQuotes)
     const initialQuote = this.state.quotes[11]
     return (
       <main className="App" role="main">
@@ -95,7 +123,7 @@ class App extends Component {
         <Quote 
           quote={ !this.state.randomQuote.length ? initialQuote : this.state.randomQuote}
           handleRadioButtonChange={this.handleRadioButtonChange}
-          handleSubmitRating={ this.handleSubmitRating }          
+          handleSubmit={ this.handleSubmit }          
           />
       </main>
     );
