@@ -92,8 +92,9 @@ async getQuoteAndRatingFromMyDB() {
     const rating = this.state.ratingValue;
     let quote = '';
     // Initially no vote in randomQuote it is set to the 11th passed in quote from Ron S API
-    if (!this.state.randomQuote.length) { quote = this.state.quotes[11]}
-    else { quote = this.state.randomQuote }; 
+    if (!this.state.randomQuote.length) { 
+      quote = this.state.quotes[11]
+    } else { quote = this.state.randomQuote }; 
     const userVoteInfo = [{
       localSession: localSession,
       cookieSession: cookieSession,
@@ -113,9 +114,6 @@ async getQuoteAndRatingFromMyDB() {
     }
     } else {
       let resData = await postQuoteRating(quote, userVoteInfo);
-        if (rating < 5) {
-          alert('Doesn\'t matter it was saved as 5 anyways');
-        }
       this.setState(prevState => ({
         ratedQuotes: [resData, ...prevState.ratedQuotes]
       }))
@@ -123,7 +121,6 @@ async getQuoteAndRatingFromMyDB() {
   }
 
   checkIfVoted(quote) {
-    console.log('ratedQuotes:', this.state.ratedQuotes);
     let val = this.state.ratedQuotes.find(obj => obj.quote === quote);
     return val ? true : false;
   }

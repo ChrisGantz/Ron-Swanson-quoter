@@ -11,8 +11,13 @@ const RatedQuotes = (props) => {
         <ul>
         {props.ratedQuotes.map(obj => {
           let totalRating = 0
-          obj.userVotes.forEach(obj => totalRating += obj.rating)
-          const avgRating = totalRating/obj.userVotes.length
+          let avgRating = 0;
+          if (obj.userVotes.length === 1) {
+            avgRating = obj.userVotes[0].rating;
+          } else {
+            obj.userVotes.forEach(obj => totalRating += obj.rating);
+            avgRating = totalRating/obj.userVotes.length;
+          }
           return (
           <li key={obj._id}>
             {obj.quote}
