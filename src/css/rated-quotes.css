@@ -12,10 +12,9 @@ ul {
   display: flex;
   justify-content: center;
 }
-.quote-wrap {
-  margin: 20px;
-  height: 150px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+
+
+.rated-quotes-wrap ul>li {
+  text-align: center;
+  padding-bottom: 15px;
 }

@@ -3,7 +3,7 @@ import Giftro from './components/giftro';
 import './App.css'
 import QuoteSize from './components/quote-size-button';
 import { getQuotesFromApi } from "./actions/get-quote";
-import { getRatedData, postQuoteRating } from "./actions/rate-quote";
+import { getRatedData, postQuoteRating, updateRating } from "./actions/rate-quote";
 import Quote from './components/quote';
 import RatedQuotes from './components/rated-quotes';
 class App extends Component {
@@ -88,16 +88,31 @@ async getQuoteAndRatingFromMyDB() {
   handleSubmit = async (e) => {
     e.preventDefault();
     const localSession = localStorage.getItem('secret');
-    const cookieSession = document.cookie;
+    const cookieSession = document.cookie.split(';').find(myCookie => myCookie.trim().startsWith('secret_code'));
     const rating = this.state.ratingValue;
-    const quote = this.state.randomQuote;
-    const isDuplicate = this.checkIfVoted(quote, localSession, cookieSession);
+    let quote = '';
+    // Initially no vote in randomQuote it is set to the 11th passed in quote from Ron S API
+    if (!this.state.randomQuote.length) { quote = this.state.quotes[11]}
+    else { quote = this.state.randomQuote }; 
+    const userVoteInfo = [{
+      localSession: localSession,
+      cookieSession: cookieSession,
+      rating: rating
+    }]
+    console.log(this.checkIfVoted(quote))
     if(cookieSession !== 'secret_code' && localSession !== 'code') {
       alert('Have you tried refreshing?')
-    } else if(isDuplicate === true) {
-      alert('You already voted beat it!')
+    } else if(this.checkIfVoted(quote)) {
+      let resData = await updateRating(quote, userVoteInfo);
+      if(resData.code === 422) {
+        alert(resData.message)
+      } else {
+        this.setState(prevState => ({
+          ratedQuotes: [resData, ...prevState.ratedQuotes]
+        }))
+    }
     } else {
-      let resData = await postQuoteRating(quote, rating, localSession, cookieSession);
+      let resData = await postQuoteRating(quote, userVoteInfo);
         if (rating < 5) {
           alert('Doesn\'t matter it was saved as 5 anyways');
         }
@@ -107,8 +122,9 @@ async getQuoteAndRatingFromMyDB() {
     }
   }
 
-  checkIfVoted(quote, localSession, cookieSession) {
-    let val = this.state.ratedQuotes.find(obj => obj.quote === quote && (localSession === obj.localSession || cookieSession === obj.cookieSession));
+  checkIfVoted(quote) {
+    console.log('ratedQuotes:', this.state.ratedQuotes);
+    let val = this.state.ratedQuotes.find(obj => obj.quote === quote);
     return val ? true : false;
   }
   
