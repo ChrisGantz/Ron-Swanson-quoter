@@ -1,3 +1,24 @@
+[demo](https://rate-ron-swanson-quote-client.herokuapp.com/)
+This app uses [ron-swanson-quotes API](https://github.com/jamesseanwright/ron-swanson-quotes). Not only does it let you get a quote of your selected size but it lets you rate the quote and you can see the average rating of other users votes.
+
+## Tech Used
+
+### Front-End
+* React
+* JavaScript
+* HTML5
+* CSS3
+
+### Back-End
+* Node.js
+* Express.js
+* Mongoose
+* Morgan
+* Cors
+
+### Deployment
+* Heroku
+* Github
 
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
